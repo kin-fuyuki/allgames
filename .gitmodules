@@ -1,0 +1,6 @@
+[submodule "lib/raylib"]
+	path = lib/raylib
+	url = https://github.com/raysan5/raylib.git
+[submodule "lib/tiny"]
+	path = lib/tiny
+	url = https://github.com/kin-fuyuki/tiny-cpp.git
