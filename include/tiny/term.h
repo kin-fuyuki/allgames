@@ -39,23 +39,23 @@ tiny::ErrorLevel tiny::level={1};
 extern tiny::ErrorLevel level;
 
 
-	const char* WHITE="\033[0m";
-	const char* BLACK="\033[30m";
-	const char* RED="\033[31m";
-	const char* GREEN="\033[32m";
-	const char* YELLOW="\033[33m";
-	const char* BLUE="\033[34m";
-	const char* MAGENTA="\033[35m";
-	const char* CYAN="\033[36m";
-	const char* BGRED="\033[41m";
-	const char* BOLDBLACK="\033[1m\033[30m";
-	const char* BOLDRED="\033[1m\033[31m";
-	const char* BOLDGREEN="\033[1m\033[32m";
-	const char* BOLDYELLOW="\033[1m\033[33m";
-	const char* BOLDBLUE="\033[1m\033[34m";
-	const char* BOLDMAGENTA="\033[1m\033[35m";
-	const char* BOLDCYAN="\033[1m\033[36m";
-	const char* BOLDWHITE="\033[1m\033[37m";
+inline	const char* WHITE="\033[0m";
+inline	const char* BLACK="\033[30m";
+inline	const char* RED="\033[31m";
+inline	const char* GREEN="\033[32m";
+inline	const char* YELLOW="\033[33m";
+inline	const char* BLUE="\033[34m";
+inline	const char* MAGENTA="\033[35m";
+inline	const char* CYAN="\033[36m";
+inline	const char* BGRED="\033[41m";
+inline	const char* BOLDBLACK="\033[1m\033[30m";
+inline	const char* BOLDRED="\033[1m\033[31m";
+inline	const char* BOLDGREEN="\033[1m\033[32m";
+inline	const char* BOLDYELLOW="\033[1m\033[33m";
+inline	const char* BOLDBLUE="\033[1m\033[34m";
+inline	const char* BOLDMAGENTA="\033[1m\033[35m";
+inline	const char* BOLDCYAN="\033[1m\033[36m";
+inline	const char* BOLDWHITE="\033[1m\033[37m";
 #define ending \
    mixer.append(info); mixer.append("\033[0m\n");\
    const char * finalinfo=mixer.c_str();\

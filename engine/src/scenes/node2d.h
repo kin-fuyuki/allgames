@@ -2,7 +2,6 @@
 #include <string>
 
 #include "nodes.h"
-#include<tiny/term.h>
 
 namespace enginend {
     struct node2d :public node {
@@ -18,14 +17,14 @@ namespace enginend {
        }
     };
     struct textured :virtual public rect{
-       int ID;
+       Texture2D* texture;
        textured(){}
-       textured(int id,float x,float y,float w, float h):ID(id){
+       textured(Texture2D* texture,float x,float y,float w, float h):texture(texture){
           this->pos=Vector2{x,y};this->size=Vector2{w,h};
        }
        void boot()override{}
        void tick()override{}
-       void draw()override{DrawTexture(LoadTexture(""),pos.x,pos.y,WHITE);}
+       void draw()override{if (texture!=nullptr)DrawTexture(*texture,pos.x,pos.y,WHITE);}
        void exit()override{}
     };
     struct colored :virtual public rect{
@@ -41,15 +40,15 @@ namespace enginend {
     };
     struct tinted :virtual public colored, virtual public textured{
        tinted(){}
-       tinted(int id,Color color,float x,float y,float w, float h):
+       tinted(Texture2D* texture,Color color,float x,float y,float w, float h):
           node2d(x, y),
           rect(x, y, w, h),
           colored(color, x, y, w, h),
-          textured(id, x, y, w, h)
+          textured(texture, x, y, w, h)
        {}
        void boot()override{this->colored::boot();this->textured::boot();}
        void tick()override{this->colored::tick();this->textured::tick();}
-       void draw()override{DrawTexture(LoadTexture(""),pos.x,pos.y,c);}
+       void draw()override{if (texture!=nullptr)DrawTexture(*texture,pos.x,pos.y,c);}
        void exit()override{this->colored::exit();this->textured::exit();}
     };
     struct text :public tinted {
@@ -61,10 +60,10 @@ namespace enginend {
        Color textcolor;
        std::string content;
        text(){ fontsize = 20; }
-       text(int id,Color textcol,Color color,float x,float y,float w,float h,Font f,float fs,std::string txt):
+       text(Texture2D* texture,Color textcol,Color color,float x,float y,float w,float h,Font f,float fs,std::string txt):
           font(f),fontsize(fs),content(txt)
        {
-          this->pos=Vector2{x,y};this->size=Vector2{w,h};this->ID=id;this->c=color;this->textcolor=textcol;
+          this->pos=Vector2{x,y};this->size=Vector2{w,h};this->texture=texture;this->c=color;this->textcolor=textcol;
           
           result=content;
           size_t initpos = 0;
@@ -101,8 +100,8 @@ namespace enginend {
        std::function<void()> function;
        bool pressed;
        button():pressed(false){}
-       button(int id,Color color,float x,float y,float w,float h,std::function<void()> func):function(func),pressed(false){
-          this->pos=Vector2{x,y};this->size=Vector2{x,y};this->ID=id;this->c=color;
+       button(Texture2D* texture,Color color,float x,float y,float w,float h,std::function<void()> func):function(func),pressed(false){
+          this->pos=Vector2{x,y};this->size=Vector2{w,h};this->texture=texture;this->c=color;
        }
        void boot()override{this->tinted::boot();}
        void tick()override{
@@ -112,16 +111,50 @@ namespace enginend {
              if(function)function();
           }
        }
-       void draw()override{DrawRectangle(pos.x,pos.y,size.x,size.y,c);}
+       void draw()override {
+		if (this->texture!=nullptr)DrawTexture(*texture,pos.x,pos.y,c);
+			else
+	       DrawRectangle(pos.x,pos.y,size.x,size.y,c);
+       }
        void exit()override{this->tinted::exit();}
     };
+	struct labeledbutton :virtual public button {
+		std::string label;
+		Font font;
+		int fontsize;
+		Color textcolor;
+		labeledbutton(std::string name,Texture2D* texture,Color color,Color text,
+			float x,float y,float w,float h,std::function<void()> func,
+			Font f,int size):font(f), fontsize(size),textcolor(text){
+			this->pos=Vector2{x,y};this->size=Vector2{w,h};this->texture=texture;this->c=color;
+			this->function=func;this->pressed=false;
+			this->label=name;
+			
+		}
+		
+		void boot()override{this->button::boot();}
+		void tick()override{
+			this->button::tick();
+		}
+		void draw()override{
+			this->button::draw();
+			
+			Vector2 textsize = MeasureTextEx(font, label.c_str(), fontsize, 1);
+			Vector2 textpos = {
+				pos.x + (size.x - textsize.x)/2,
+				pos.y + (size.y - textsize.y)/2
+			 };
+			DrawTextEx(font, label.c_str(), textpos, fontsize, 1, textcolor);
+		}
+		void exit()override{this->button::exit();}
+	};
     struct slider :virtual public tinted{
        float value;
        float minvalue;
        float maxvalue;
        slider():value(0),minvalue(0),maxvalue(1){}
-       slider(int id,Color color,float x,float y,float w,float h,float min,float max,float val):value(val),minvalue(min),maxvalue(max){
-          this->pos=Vector2{x,y};this->size=Vector2{x,y};this->ID=id;this->c=color;
+       slider(Texture2D* texture,Color color,float x,float y,float w,float h,float min,float max,float val):value(val),minvalue(min),maxvalue(max){
+          this->pos=Vector2{x,y};this->size=Vector2{x,y};this->texture=texture;this->c=color;
        }
        void boot()override{this->tinted::boot();}
        void tick()override{
@@ -143,8 +176,8 @@ namespace enginend {
     };
     struct textfield :public text{
        textfield(){}
-       textfield(int id,Color textcol,Color color,float x,float y,float w,float h,Font f,float fs,std::string txt):
-          text(id,textcol,color,x,y,w,h,f,fs,txt){}
+       textfield(Texture2D* texture,Color textcol,Color color,float x,float y,float w,float h,Font f,float fs,std::string txt):
+          text(texture,textcol,color,x,y,w,h,f,fs,txt){}
        void boot()override{this->text::boot();}
        void tick()override{this->text::tick();}
        void draw()override{
@@ -165,8 +198,8 @@ namespace enginend {
        bool active;
        int cursorpos;
        textinput():active(false),cursorpos(0){}
-       textinput(int id,Color textcol,Color color,float x,float y,float w,float h,Font f,float fs):active(false),cursorpos(0){
-          this->pos=Vector2{x,y};this->size=Vector2{x,y};this->ID=id;this->c=color;this->font=f;this->content="";
+       textinput(Texture2D* texture,Color textcol,Color color,float x,float y,float w,float h,Font f,float fs):active(false),cursorpos(0){
+          this->pos=Vector2{x,y};this->size=Vector2{x,y};this->texture=texture;this->c=color;this->font=f;this->content="";
           this->textcolor=textcol;this->fontsize=fs;
        }
        void boot()override{this->text::boot();}
@@ -201,8 +234,8 @@ namespace enginend {
        bool active;
        int cursorpos;
        textinputfield():active(false),cursorpos(0){}
-       textinputfield(int id,Color textcol,Color color,float x,float y,float w,float h,Font f,float fs):active(false),cursorpos(0),
-          textfield(id,textcol,color,x,y,w,h,f,fs,""){}
+       textinputfield(Texture2D* texture,Color textcol,Color color,float x,float y,float w,float h,Font f,float fs):active(false),cursorpos(0),
+          textfield(texture,textcol,color,x,y,w,h,f,fs,""){}
        void boot()override{this->textfield::boot();}
        void tick()override{
           this->textfield::tick();

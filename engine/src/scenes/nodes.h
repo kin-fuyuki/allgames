@@ -2,6 +2,7 @@
 #include "../gr.h"
 #include "../aud.h"
 #include "../net.h"
+#include<tiny/term.h>
 
 namespace enginend {
 	struct node{

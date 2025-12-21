@@ -16,6 +16,6 @@ target_link_libraries(forespend PRIVATE
 )
 target_include_directories(forespend PUBLIC
         ${CMAKE_SOURCE_DIR}/include
-        ${CMAKE_SOURCE_DIR}/lib/raylib/include
+        ${CMAKE_SOURCE_DIR}/lib/raylib/build/raylib/include
         ${CMAKE_SOURCE_DIR}/engine/include
 )

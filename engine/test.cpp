@@ -17,7 +17,7 @@ public:
 		s.nodes=std::list<node*>{
 			
 			new colored(Color{255,255,255,255},0,0,500,500),
-			new textfield(0,Color{255,127,127,255},Color{127,127,127,255}
+			new textfield(nullptr,Color{255,127,127,255},Color{127,127,127,255}
 				,100,100,220,32,GetFontDefault(),32,
 			"welcome to enginend!\n"
 				  "hehe"
