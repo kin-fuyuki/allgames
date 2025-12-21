@@ -117,8 +117,8 @@ struct TDF_FUNCS{
 struct TDF_FILE{
 	boost::unordered_map<std::string,TDF_DATA>* data=nullptr;
 	char*filepath;
-	TDF_FUNCS FUNCS;
 	std::vector<void*> todelete;
+	TDF_FUNCS FUNCS;
 	void close(){
 		for(size_t i=0;i<todelete.size();i++){
 			delete todelete[i];
