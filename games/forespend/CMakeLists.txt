@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-SET(CMAKE_CXX_FLAGS "-std=c++23")
+set(CMAKE_CXX_FLAGS "-std=c++17 -Wno-error")
 file(GLOB_RECURSE FORESPEND_SOURCES "src/*.cpp")
 add_executable(forespend ${FORESPEND_SOURCES})
 

@@ -1,9 +1,31 @@
 #include "nodes.h"
 #include <list>
-struct scene{
-	std::list<node> nodes;
-    virtual void init() {}
-    virtual void render() {}
-    virtual void update() {}
-    virtual void close() {}
-};
+
+
+namespace enginend {
+	struct scene{
+		std::list<enginend::node*> nodes;
+		virtual void boot() {
+			for (enginend::node* n : nodes) {
+				n->boot();
+			}
+		}
+		virtual void draw() {
+			BeginDrawing();
+			for (enginend::node* n : nodes) {
+				n->draw();
+			}
+			EndDrawing();
+		}
+		virtual void tick() {
+			for (enginend::node* n : nodes) {
+				n->tick();
+			}
+		}
+		virtual void exit() {
+			for (enginend::node* n : nodes) {
+				n->exit();
+			}
+		}
+	};
+}

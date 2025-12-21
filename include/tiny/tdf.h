@@ -7,6 +7,7 @@
 #include <fstream>
 #include <stdexcept>
 #include <vector>
+#pragma GCC diagnostic ignored "-Wdelete-incomplete"
 #ifndef TINYDATAFORMAT_H
 #define TINYDATAFORMAT_H
 #define TINYDEFINEHEADER "0000_TDF_HEADER_DEFINE"

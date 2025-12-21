@@ -2,3 +2,4 @@
 #include "gr.h"
 #include "aud.h"
 #include "program.h"
+#include "scenes/scene.h"

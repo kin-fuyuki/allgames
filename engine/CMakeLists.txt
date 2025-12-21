@@ -1,12 +1,11 @@
 cmake_minimum_required(VERSION 3.20)
-SET(CMAKE_CXX_FLAGS "-std=c++23 -Werror")
-file(GLOB_RECURSE ENGINE_SOURCES "src/*.cpp")
-add_library(enginend SHARED ${ENGINE_SOURCES})
-target_include_directories(enginend PUBLIC
-        ${CMAKE_SOURCE_DIR}/include
-        
+set(CMAKE_CXX_FLAGS "-std=c++17 -Wno-error")
+file(GLOB_RECURSE ENGINE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+add_custom_command(OUTPUT "${CMAKE_BINARY_DIR}/force_rebuild"
+        COMMAND rm -f "${CMAKE_SOURCE_DIR}/link/libenginend.so"
+        COMMAND rm -rf "${CMAKE_SOURCE_DIR}/include/enginend"
 )
-
+add_library(enginend SHARED ${ENGINE_SOURCES} "${CMAKE_BINARY_DIR}/force_rebuild")
 target_link_directories(
         enginend PUBLIC
         "${CMAKE_SOURCE_DIR}/link")
@@ -33,3 +32,25 @@ foreach(HEADER ${HEADER_FILES})
             COMMAND ${CMAKE_COMMAND} -E copy_if_different "${HEADER}" "${DEST}"
     )
 endforeach()
+
+
+add_executable(test test.cpp)
+
+set_target_properties(test PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/engine/test"
+)
+target_link_directories(
+        test PUBLIC
+        "${CMAKE_SOURCE_DIR}/link")
+target_link_libraries(test PRIVATE
+        "${CMAKE_SOURCE_DIR}/link/libenginend.so"
+        "${CMAKE_SOURCE_DIR}/link/libdesktopraylib.so"
+)
+target_include_directories(test PUBLIC
+        ${CMAKE_SOURCE_DIR}/include
+        ${CMAKE_SOURCE_DIR}/lib/raylib/build/raylib/include
+)
+target_include_directories(enginend PUBLIC
+        ${CMAKE_SOURCE_DIR}/lib/raylib/build/raylib/include
+
+)

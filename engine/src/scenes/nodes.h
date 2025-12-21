@@ -1,11 +1,15 @@
+#pragma once
 #include "../gr.h"
 #include "../aud.h"
 #include "../net.h"
-struct node{
-public:
+
+namespace enginend {
+	struct node{
+	public:
 	
-    virtual void init() {}
-    virtual void render() {}
-    virtual void update() {}
-    virtual void close() {}
-};
+		virtual void boot()=0;
+		virtual void tick()=0;
+		virtual void draw()=0;
+		virtual void exit()=0;
+	};
+}

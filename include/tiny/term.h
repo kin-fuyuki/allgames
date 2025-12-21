@@ -1,4 +1,5 @@
 #pragma once
+#pragma GCC diagnostic ignored "-Wvarargs"
 #ifndef TINYTERM_H
 #define TINYTERM_H
 
@@ -37,24 +38,24 @@ tiny::ErrorLevel tiny::level={1};
 
 extern tiny::ErrorLevel level;
 
-#define WHITE   "\033[0m"       /* White */
-#define BLACK   "\033[30m"      /* Black */
-#define RED     "\033[31m"      /* Red */
-#define GREEN   "\033[32m"      /* Green */
-#define YELLOW  "\033[33m"      /* Yellow */
-#define BLUE    "\033[34m"      /* Blue */
-#define MAGENTA "\033[35m"      /* Magenta */
-#define CYAN    "\033[36m"      /* Cyan */
-#define WHITE   "\033[37m"      /* White */
-#define BGRED   "\033[41m"      /* Red */
-#define BOLDBLACK   "\033[1m\033[30m"      /* Bold Black */
-#define BOLDRED     "\033[1m\033[31m"      /* Bold Red */
-#define BOLDGREEN   "\033[1m\033[32m"      /* Bold Green */
-#define BOLDYELLOW  "\033[1m\033[33m"      /* Bold Yellow */
-#define BOLDBLUE    "\033[1m\033[34m"      /* Bold Blue */
-#define BOLDMAGENTA "\033[1m\033[35m"      /* Bold Magenta */
-#define BOLDCYAN    "\033[1m\033[36m"      /* Bold Cyan */
-#define BOLDWHITE   "\033[1m\033[37m"      /* Bold White */
+
+	const char* WHITE="\033[0m";
+	const char* BLACK="\033[30m";
+	const char* RED="\033[31m";
+	const char* GREEN="\033[32m";
+	const char* YELLOW="\033[33m";
+	const char* BLUE="\033[34m";
+	const char* MAGENTA="\033[35m";
+	const char* CYAN="\033[36m";
+	const char* BGRED="\033[41m";
+	const char* BOLDBLACK="\033[1m\033[30m";
+	const char* BOLDRED="\033[1m\033[31m";
+	const char* BOLDGREEN="\033[1m\033[32m";
+	const char* BOLDYELLOW="\033[1m\033[33m";
+	const char* BOLDBLUE="\033[1m\033[34m";
+	const char* BOLDMAGENTA="\033[1m\033[35m";
+	const char* BOLDCYAN="\033[1m\033[36m";
+	const char* BOLDWHITE="\033[1m\033[37m";
 #define ending \
    mixer.append(info); mixer.append("\033[0m\n");\
    const char * finalinfo=mixer.c_str();\
@@ -62,7 +63,7 @@ extern tiny::ErrorLevel level;
    vfprintf (stdout, finalinfo, arg);\
    va_end (arg);
 
-inline void echo(char * info,...){
+inline void echo(const char * info,...){
    if (level.value==4)
    {
    va_list arg;
@@ -73,36 +74,36 @@ inline void echo(char * info,...){
    vfprintf (stdout, finalinfo, arg);
    va_end (arg);}
 }
-inline void warning( char * info,...){
+inline void warning(const char * info,...){
    if (level.value>=1)
    {
    va_list arg;
    std::string mixer=YELLOW;ending
 }
 }
-inline void fatal( char * info,...){
+inline void fatal(const char * info,...){
    va_list arg;
    std::string mixer=BOLDWHITE+std::string(BGRED);ending
 }
-inline void error( char * info,...){
+inline void error(const char * info,...){
    if (level.value>=0)
    {
    va_list arg;
    std::string mixer=BOLDRED;ending
 }}
-inline void success(char * info , ...){
+inline void success(const char * info , ...){
    if (level.value>=2)
    {
    va_list arg;
    std::string mixer=GREEN;ending}
 }
-inline void message(char * info , ...){
+inline void message(const char * info , ...){
    if (level.value>=3)
    {
    va_list arg;
    std::string mixer=BOLDWHITE;ending}
 }
-inline void startup(char* game,char*version){
+inline void startup(const char* game,const char*version){
 int lv=level.value;level.value=6;
     echo("%s %s",game,version);
     warning("be warned that");
