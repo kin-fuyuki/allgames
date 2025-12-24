@@ -96,10 +96,10 @@ struct logi: public virtual textfield {
 		}
 	}
 };
-
+void playbuttonfunc();
 void quit(){exit(0);}
-
-class test:public program {
+#include <boost/process.hpp>
+class launcher:public program {
 public:
 	Texture2D bg;
 	Texture2D buttonfore;
@@ -118,7 +118,7 @@ public:
 	Image img;
 	bool captured=true;
 	const char* CONF() final{return "test.tdf";}
-	test(){};
+	launcher(){};
 	void boot() override {
 		tickrate=15;
 		framerate=15;
@@ -168,7 +168,7 @@ public:
 		buttonslabel[7]=LoadTexture("res/exit.png");
 		playbtn[0]=LoadTexture("res/playoff.png");
 		playbtn[1]=LoadTexture("res/playon.png");
-		playbutton= new button(&playbtn[0], {255,255,255,255},406,(18*11)+17+9,153,59,nullptr);
+		playbutton= new button(&playbtn[0], {255,255,255,255},406,(18*11)+17+9,153,59,std::function<void()>(playbuttonfunc));
 		s.nodes=std::list<node*>{
 			new background(&bg,0,0,600,300),
 			new textured(&buttonfore,3,36,62,62),
@@ -271,6 +271,7 @@ public:
 	}
 };
 
+launcher* launch;
 tiny::ErrorLevel tiny::level{8};
 
 int main(int argc, char *argv[]) {
@@ -289,14 +290,14 @@ int main(int argc, char *argv[]) {
 		nete.currentversion=version;
 		config.setstring({"version"},nete.currentversion);
 	}
+	launcher e;
+	launch=&e;
 	tiny::echo ("starting net");
 	nete.start();
 	tiny::echo ("downloading github info");
 	nete.github();
 	tiny::echo ("starting launcher");
-	test e;
 	e.boot();
-
 	std::atomic<bool> running{true};
 
 	std::thread tickthread([&e, &running]() {
@@ -339,4 +340,18 @@ int main(int argc, char *argv[]) {
 	config.save();
 	config.close();
 	return 0;
+}
+void playbuttonfunc() {
+	if (nete.currentversion!="NULL") {
+		FILE* gameexe = fopen(("forespend/versions/"+nete.currentversion+"/bin/game").c_str(), "r");
+		if (gameexe) {
+			fclose(gameexe);
+			
+			std::thread thread([]() {
+				boost::process::system("bin/game",boost::process::start_dir=("forespend/versions/"+nete.currentversion));
+			});
+			exit(0);
+		}
+		
+	}
 }

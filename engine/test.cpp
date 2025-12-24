@@ -2,13 +2,13 @@
 #include <raylib.h>
 #include <enginend/scenes/node2d.h>
 using namespace enginend;
-class test:public program {
+class launcher:public program {
 public:
 	
 	bool vsync = true;
 	scene s;
 	const char* CONF() final{return "test.tdf";}
-	test(){};
+	launcher(){};
 	void boot() override {
 		SetConfigFlags(FLAG_VSYNC_HINT);
 		InitWindow(500,500,"test");
@@ -42,7 +42,7 @@ public:
 tiny::ErrorLevel tiny::level{6};
 int main(int argc, char *argv[]) {
 	tiny::startup((char*)"enginend test",(char*)"1.0");
-	test e;
+	launcher e;
 	e.boot();
 	while (!WindowShouldClose()) {
 		e.tick();
