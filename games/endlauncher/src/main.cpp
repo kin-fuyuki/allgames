@@ -9,7 +9,9 @@
 using namespace enginend;
 
 netio nete{};
+/*
 
+ */
 struct background: public virtual textured {
 	background(Texture2D* texture,float x,float y,float w, float h) {
 		this->pos=Vector2{x,y};this->size=Vector2{w,h};
@@ -105,11 +107,14 @@ public:
 	Texture2D playbtn[2];
 	Texture2D menubtn[3];
 	button* buttons[8];
+	button* playbutton;
 	Texture2D buttonslabel[8];
 	Font gamename,changelog,information;
 	bool vsync=true;
 	scene s;
 	RenderTexture2D target;
+	text version;
+	std::string selectedversion="";
 	Image img;
 	bool captured=true;
 	const char* CONF() final{return "test.tdf";}
@@ -127,10 +132,13 @@ public:
 		buttonfore=LoadTexture("res/forebuttonon.png");
 		buttonlock=LoadTexture("res/lockbutton.png");
 		gamename=LoadFont("res/showcase.ttf");
+		changelog=LoadFont("res/log.ttf");
+		information=LoadFont("res/info.ttf");
 		menubtn[0]=LoadTexture("res/btn.png");
 		menubtn[1]=LoadTexture("res/btnhover.png");
 		menubtn[2]=LoadTexture("res/btnpress.png");
-		changelog=LoadFont("res/log.ttf");
+		selectedversion=nete.currentversion;
+		version= text (nullptr,Color{255,255,255,255},Color{0,0,0,0},96,16*17,1,1,information,20,"version: "+selectedversion);
 		SetTraceLogLevel(LOG_ERROR);
 		buttons[0]=new button(&menubtn[0], {255,255,255,255},468,58,96,16,nullptr);
 		buttonslabel[0]=LoadTexture("res/options.png");
@@ -160,6 +168,7 @@ public:
 		buttonslabel[7]=LoadTexture("res/exit.png");
 		playbtn[0]=LoadTexture("res/playoff.png");
 		playbtn[1]=LoadTexture("res/playon.png");
+		playbutton= new button(&playbtn[0], {255,255,255,255},406,(18*11)+17+9,153,59,nullptr);
 		s.nodes=std::list<node*>{
 			new background(&bg,0,0,600,300),
 			new textured(&buttonfore,3,36,62,62),
@@ -175,35 +184,54 @@ public:
 			buttons[5],new textured(&buttonslabel[5],468,58+(18*5),96,16),
 			buttons[6],new textured(&buttonslabel[6],468,58+(18*6)+15,96,16),
 			buttons[7],new textured(&buttonslabel[7],468,58+(18*7)+17,96,16),
-			new button(&playbtn[0], {255,255,255,255},406,(18*11)+17+9,153,59,nullptr),
+			playbutton,
 			new logi(nullptr,Color{255,0,255,255},Color{0,0,0,0},90,58,466,159,changelog,8,nete.changelog),
+			new text(nullptr,Color{255,255,255,255},Color{0,0,0,0},96+16,(16*14)-3,1,1,information,20,"downloaded        verified"),
+			&version,
 		};
 		s.boot();
 	}
 	int buttondelay=0;
 	void tick() override {
-		for (button* b : buttons) {
-			if (b->hover) {
-				if (b->pressed) {
-					b->texture=&menubtn[2];
-					buttondelay=5;
+		if (nete.currentversion!=selectedversion) {
+			selectedversion=nete.currentversion;
+			this->version.content="version: "+selectedversion;
+			tiny::echo("selecting version: %s",selectedversion.c_str());
+		}
+		{
+			for (button* b : buttons) {
+				if (b->hover) {
+					if (b->pressed) {
+						b->texture=&menubtn[2];
+						buttondelay=5;
+					}else {
+						if (b->texture->id==menubtn[2].id) {
+							if(buttondelay<0) {
+								b->texture=&menubtn[1];
+							}
+						}else {
+							b->texture=&menubtn[1];
+						}
+					}
 				}else {
 					if (b->texture->id==menubtn[2].id) {
 						if(buttondelay<0) {
-							b->texture=&menubtn[1];
+							b->texture=&menubtn[0];
 						}
 					}else {
-						b->texture=&menubtn[1];
-					}
-				}
-			}else {
-				if (b->texture->id==menubtn[2].id) {
-					if(buttondelay<0) {
 						b->texture=&menubtn[0];
 					}
-				}else {
-					b->texture=&menubtn[0];
 				}
+			}
+		}
+		{
+			if (playbutton->pressed) {
+				playbutton->texture=&playbtn[1];
+				buttondelay=5;
+			}else {
+			if(buttondelay<0) {
+				playbutton->texture=&playbtn[0];
+			}
 			}
 		}
 		s.tick();
@@ -243,12 +271,29 @@ public:
 	}
 };
 
-tiny::ErrorLevel tiny::level{6};
+tiny::ErrorLevel tiny::level{8};
 
 int main(int argc, char *argv[]) {
-	nete.start();
-	nete.github();
 	tiny::startup((char*)"enginend test",(char*)"1.0");
+		tiny::echo ("checking if cfg.tdf exists, if not create");
+		std::ofstream tdffile("cfg.tdf");
+		tdffile.close();
+	
+	tiny::echo ("read cfg.tdf");
+	tiny::TDF_FILE config;config.filepath="cfg.tdf";config.read();
+	std::string version;
+	tiny::echo ("getting version");
+	try {version=config.getstring({"version"});}
+	catch (tiny::TDF_ERR e) {version="NULL";}
+	if (version!="NULL") {
+		nete.currentversion=version;
+		config.setstring({"version"},nete.currentversion);
+	}
+	tiny::echo ("starting net");
+	nete.start();
+	tiny::echo ("downloading github info");
+	nete.github();
+	tiny::echo ("starting launcher");
 	test e;
 	e.boot();
 
@@ -257,7 +302,7 @@ int main(int argc, char *argv[]) {
 	std::thread tickthread([&e, &running]() {
 		double tickrate=1.0/e.tickrate;
 		auto lasttick=std::chrono::high_resolution_clock::now();
-
+		
 		while (running) {
 			auto now=std::chrono::high_resolution_clock::now();
 			double elapsed=std::chrono::duration_cast<std::chrono::duration<double>>(now-lasttick).count();
@@ -290,5 +335,8 @@ int main(int argc, char *argv[]) {
 	tickthread.join();
 
 	e.exit();
+	config.setstring({"version"},nete.currentversion);
+	config.save();
+	config.close();
 	return 0;
 }

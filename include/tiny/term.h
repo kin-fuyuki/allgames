@@ -64,7 +64,7 @@ inline	const char* BOLDWHITE="\033[1m\033[37m";
    va_end (arg);
 
 inline void echo(const char * info,...){
-   if (level.value==4)
+   if (level.value>=4)
    {
    va_list arg;
    std::string mixer=info;

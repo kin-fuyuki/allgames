@@ -29,51 +29,87 @@ struct netio {
 	std::string url="https://github.com/kin-fuyuki/forespend_cpp/releases/download/";
 	std::vector<std::string> *versionhistory;
 	std::string changelog="could not connect to github\nplease check your internet connection";
+	std::string currentversion="NULL";
+	std::string newestversion="";
+
 	void start() {
-		CURL* curltdf = curl_easy_init();
-		CURLcode ret;
-		if (curltdf) {
-			FILE* history = fopen("versions.tdf", "wb");
-			curl_easy_setopt(curltdf, CURLOPT_URL, "https://raw.githubusercontent.com/kin-fuyuki/allgames/refs/heads/master/versions.tdf");
-			curl_easy_setopt(curltdf, CURLOPT_WRITEFUNCTION, write_data);
-			curl_easy_setopt(curltdf, CURLOPT_WRITEDATA, history);
-			ret = curl_easy_perform(curltdf);
-			curl_easy_cleanup(curltdf);
-			fclose(history);
-			
-			tiny::TDF_FILE fetchversions;
-			fetchversions.filepath = "versions.tdf";
-			fetchversions.read();
-			boost::unordered_map<std::string,tiny::TDF_DATA>* foreversions= fetchversions.getclass({"forespend"});
-			std::vector<std::string> versions;
-			for (auto version:*foreversions) {
-				tiny::error("path: %s",version.first.c_str());
-				if (version.second.type==tiny::TDF_Type::TDF_DEFINES) {
-					versions=*(std::vector<std::string>*)version.second.datapointer;
-				}
-			}
-			std::sort(versions.begin(), versions.end(), [](const std::string& a, const std::string& b) {
-				int ra = 0, rb = 0;
-				float va = 0.0f, vb = 0.0f;
-				char pa = ' ', pb = ' ';
-				char rea = ' ', reb = ' ';
-				sscanf(a.c_str(), "%d.%f.%c.%c", &ra, &va, &pa, &rea);
-				sscanf(b.c_str(), "%d.%f.%c.%c", &rb, &vb, &pb, &reb);
-				if (ra != rb) return ra > rb;
-				if (va != vb) return va > vb;
-				if (pa != pb) return pa > pb;
-				return rea < reb;
-			});
-			tiny::success("\n\nforespend versions:");
-			for (auto version:versions) {
-				
-				tiny::warning("%s",version.c_str());
-			}
-			tiny::success("found\n\n");
-			versionhistory=&versions;
-		}
-		
-	}
+    const int MAX_RETRIES = 3;
+    int attempts = 0;
+    bool download_success = false;
+
+    while (attempts < MAX_RETRIES && !download_success) {
+        CURL* curltdf = curl_easy_init();
+        if (curltdf) {
+            FILE* history = fopen("versions.tdf", "wb");
+            if (!history) break;
+
+            curl_easy_setopt(curltdf, CURLOPT_URL, "https://raw.githubusercontent.com/kin-fuyuki/allgames/refs/heads/master/versions.tdf");
+            curl_easy_setopt(curltdf, CURLOPT_WRITEFUNCTION, write_data);
+            curl_easy_setopt(curltdf, CURLOPT_WRITEDATA, history);
+            
+            CURLcode ret = curl_easy_perform(curltdf);
+            fclose(history);
+            curl_easy_cleanup(curltdf);
+
+            if (ret == CURLE_OK) {
+                download_success = true;
+            } else {
+                attempts++;
+                tiny::warning("Version fetch failed (Attempt %d/%d): %s", attempts, MAX_RETRIES, curl_easy_strerror(ret));
+            }
+        }
+    }
+
+    if (!download_success) {
+        tiny::fatal("Could not download versions.tdf after %d attempts.", MAX_RETRIES);
+        return;
+    }
+
+    // Processing the file
+    tiny::TDF_FILE fetchversions;
+    fetchversions.filepath = "versions.tdf";
+    fetchversions.read();
+    
+    boost::unordered_map<std::string, tiny::TDF_DATA>* foreversions = fetchversions.getclass({"forespend"});
+    if (!foreversions) return;
+
+    std::vector<std::string> versions;
+    for (auto& version : *foreversions) {
+        if (version.second.type == tiny::TDF_Type::TDF_DEFINES) {
+            versions = *(std::vector<std::string>*)version.second.datapointer;
+        }
+    }
+
+    if (versions.empty()) return;
+
+    std::sort(versions.begin(), versions.end(), [](const std::string& a, const std::string& b) {
+        int ra = 0, rb = 0;
+        float va = 0.0f, vb = 0.0f;
+        char pa = ' ', pb = ' ';
+        char rea = ' ', reb = ' ';
+        sscanf(a.c_str(), "%d.%f.%c.%c", &ra, &va, &pa, &rea);
+        sscanf(b.c_str(), "%d.%f.%c.%c", &rb, &vb, &pb, &reb);
+        if (ra != rb) return ra > rb;
+        if (va != vb) return va > vb;
+        if (pa != pb) return pa > pb;
+        return rea < reb;
+    });
+
+    this->newestversion = versions[0]; // Sort is descending, index 0 is newest
+    if (this->newestversion != "") {
+        this->currentversion = newestversion;
+    }
+
+    tiny::success("\n\nforespend versions found:");
+    for (auto& version : versions) {
+        tiny::warning("%s", version.c_str());
+    }
+
+    // Use a member or persistent copy to avoid pointer to local variable
+    static std::vector<std::string> persistent_versions;
+    persistent_versions = versions;
+    versionhistory = &persistent_versions;
+}
 	void github() {
 		CURL* curl;
 		CURLcode res;
