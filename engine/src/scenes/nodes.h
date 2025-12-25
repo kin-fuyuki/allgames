@@ -1,5 +1,5 @@
 #pragma once
-#include <oneapi/tbb/partitioner.h>
+#include <vector>
 
 #include "../gr.h"
 #include "../aud.h"
