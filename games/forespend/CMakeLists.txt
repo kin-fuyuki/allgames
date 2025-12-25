@@ -7,6 +7,7 @@ add_executable(forespend ${FORESPEND_SOURCES})
 set_target_properties(forespend PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/built/forespend/${PLATFORM_DIR}/bin"
 )
+
 target_link_directories(
         forespend PUBLIC
         "${CMAKE_SOURCE_DIR}/link")

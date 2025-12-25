@@ -15,12 +15,9 @@ void client::boot() {
 	target=LoadRenderTexture(380,240);
 }
 void client::draw() {
-	BeginTextureMode(target);
-	this->currentscene->draw();
-	EndTextureMode();
 	BeginDrawing();
 	ClearBackground(WHITE);
-	DrawTexturePro(target.texture, {0, 0, 380,240}, {0, 0, (float)GetScreenWidth(), (float)GetScreenHeight()}, {0, 0}, 0, WHITE);
+	this->currentscene->draw();
 	EndDrawing();
 }
 void client::exit() {

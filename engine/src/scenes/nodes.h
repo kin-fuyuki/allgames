@@ -1,4 +1,6 @@
 #pragma once
+#include <oneapi/tbb/partitioner.h>
+
 #include "../gr.h"
 #include "../aud.h"
 #include "../net.h"
@@ -6,13 +8,19 @@
 
 	namespace enginend {
 namespace nodes {
-		struct node{
+	struct node{
 		public:
-	
 			virtual void boot()=0;
 			virtual void tick()=0;
 			virtual void draw()=0;
 			virtual void exit()=0;
 		};
 	}
+	struct group : public virtual enginend::nodes::node {
+		std::vector<node*> children;
+		void boot(){for (node* n: children){n->boot();}}
+		void tick(){for (node* n: children){n->tick();}}
+		void draw(){for (node* n: children){n->draw();}}
+		void exit(){for (node* n: children){n->exit();}}
+	};
 }

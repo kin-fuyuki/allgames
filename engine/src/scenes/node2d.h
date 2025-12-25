@@ -35,6 +35,7 @@ namespace enginend {
 			int framedelay;
 			int framecounter;
 			unsigned int nextframeoffset;
+			int prevframe;
 
 			animated() : frames(0), currentframe(0), framedelay(6), framecounter(0), nextframeoffset(0) {
 				animimage.data = nullptr;
@@ -60,10 +61,14 @@ namespace enginend {
 					currentframe++;
 					if (currentframe >= frames) currentframe = 0;
 					nextframeoffset = animimage.width * animimage.height * 4 * currentframe;
-					UpdateTexture(*texture, ((unsigned char*)animimage.data) + nextframeoffset);
 				}
 			}
 			void draw() override {
+				
+				if (prevframe!=currentframe){
+					prevframe=currentframe;
+					UpdateTexture(*this->texture,((unsigned char*)animimage.data)+nextframeoffset);
+				}
 				textured::draw();
 			}
 			void exit() override {

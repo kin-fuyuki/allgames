@@ -1,5 +1,4 @@
 #pragma once
-#pragma once
 #include <string>
 
 #include "nodes.h"
@@ -23,6 +22,8 @@ namespace enginend{
 				Texture2D* texture;
 				textured(){texture=nullptr;}
 				textured(Texture2D* texture,double x,double y,double w,double h):texture(texture),rect(x,y,w,h){}
+				void boot() override{}
+				void tick() override{}
 				void draw()override{
 					if(texture==nullptr)return;
 					float sw=GetScreenWidth();
@@ -31,11 +32,16 @@ namespace enginend{
 					float ay=y*sh;
 					float aw=w*sw;
 					float ah=h*sh;
+					tiny::echo("og: %f %f %f %f", x,y,w,h);
+					tiny::echo("transformed: %f %f %f %f", ax, ay, aw, ah);
 					DrawTexturePro(*texture,{0,0,(float)texture->width,(float)texture->height},{ax,ay,aw,ah},{0,0},0,WHITE);
 				}
 				void exit()override {
-					UnloadTexture(*texture);
-					delete texture;
+					if(texture){
+						UnloadTexture(*texture);
+						delete texture;
+						texture=nullptr;
+					}
 				}
 			};
 			struct animated :virtual public textured{
@@ -44,14 +50,17 @@ namespace enginend{
 				int currentframe;
 				int framedelay;
 				int framecounter;
+				int prevframe;
 				unsigned int nextframeoffset;
-				animated():frames(0),currentframe(0),framedelay(6),framecounter(0),nextframeoffset(0){
+				animated():frames(0),currentframe(1),framedelay(6),framecounter(0),nextframeoffset(0){
 					animimage.data=nullptr;
+					prevframe=currentframe;
 				}
-				void boot()override{}
 				animated(const char* gifpath,double x,double y,double w,double h,int delay=6):
-				   textured(nullptr,x,y,w,h),framedelay(delay),currentframe(0),framecounter(0),frames(0),nextframeoffset(0)
+					textured(nullptr,x,y,w,h),framedelay(delay),currentframe(1),framecounter(0),frames(0),nextframeoffset(0)
 				{
+					prevframe=currentframe;
+					this->x=x; this->y=y; this->w=w; this->h=h;
 					animimage=LoadImageAnim(gifpath,&frames);
 					if(frames>0){
 						texture=new Texture2D(LoadTextureFromImage(animimage));
@@ -65,13 +74,18 @@ namespace enginend{
 						currentframe++;
 						if(currentframe>=frames)currentframe=0;
 						nextframeoffset=animimage.width*animimage.height*4*currentframe;
-						UpdateTexture(*texture,((unsigned char*)animimage.data)+nextframeoffset);
+						tiny::echo("updating node\nframes: %i\n current frame: %i",frames,currentframe);
+						tiny::echo("%i",nextframeoffset);
 					}
 				}
 				void draw()override {
+					if (prevframe!=currentframe){
+						prevframe=currentframe;
+						UpdateTexture(*this->texture,((unsigned char*)animimage.data)+nextframeoffset);
+					}
 					textured::draw();
 				}
-				void exit(){
+				void exit()override{
 					if(animimage.data)UnloadImage(animimage);
 					textured::exit();
 				}
@@ -80,6 +94,8 @@ namespace enginend{
 				Color c;
 				colored(){}
 				colored(Color color,double x,double y,double w,double h):c(color),rect(x,y,w,h){}
+				void boot()override{}
+				void tick()override{}
 				void draw()override{
 					float sw=GetScreenWidth();
 					float sh=GetScreenHeight();
@@ -89,15 +105,18 @@ namespace enginend{
 					float ah=h*sh;
 					DrawRectangle(ax,ay,aw,ah,c);
 				}
+				void exit()override{}
 			};
 			struct tinted :virtual public colored,virtual public textured{
 				tinted(){}
 				tinted(Texture2D* texture,Color color,double x,double y,double w,double h):
-				   node2d(x,y,w,h),
-				   rect(x,y,w,h),
-				   colored(color,x,y,w,h),
-				   textured(texture,x,y,w,h)
+					node2d(x,y,w,h),
+					rect(x,y,w,h),
+					colored(color,x,y,w,h),
+					textured(texture,x,y,w,h)
 				{}
+				void boot()override{}
+				void tick()override{}
 				void draw()override{
 					if(texture==nullptr)return;
 					float sw=GetScreenWidth();
@@ -107,6 +126,9 @@ namespace enginend{
 					float aw=w*sw;
 					float ah=h*sh;
 					DrawTexturePro(*texture,{0,0,(float)texture->width,(float)texture->height},{ax,ay,aw,ah},{0,0},0,c);
+				}
+				void exit()override{
+					textured::exit();
 				}
 			};
 			struct text :public tinted {
@@ -119,8 +141,8 @@ namespace enginend{
 				std::string content;
 				text(){fs=20;}
 				text(Texture2D* texture,Color txcol,Color color,double x,double y,double w,double h,Font f,float fsize,std::string txt):
-				   tinted(texture,color,x,y,w,h),
-				   font(f),fs(fsize),content(txt),txc(txcol)
+					tinted(texture,color,x,y,w,h),
+					font(f),fs(fsize),content(txt),txc(txcol)
 				{
 					result=content;
 					size_t initp=0;
@@ -129,8 +151,8 @@ namespace enginend{
 						initp+=2;
 					}
 				}
+				void boot()override{}
 				void tick()override {
-					tinted::tick();
 					if(result!=content){
 						result=content;
 						size_t initp=0;
@@ -156,15 +178,18 @@ namespace enginend{
 					DrawRectangle(ax-charsize.x,ay-charsize.y,minw+p,minh+p,c);
 					DrawTextEx(font,content.c_str(),{ax,ay},fs,1,txc);
 				}
+				void exit()override{
+					tinted::exit();
+				}
 			};
 			struct button :virtual public tinted{
 				void(*func)();
 				bool pressed;
 				bool hover;
-				button():func(nullptr),pressed(false){}
-				button(Texture2D* texture,Color color,double x,double y,double w,double h,void(*f)()):func(f),pressed(false),tinted(texture,color,x,y,w,h){}
+				button():func(nullptr),pressed(false),hover(false){}
+				button(Texture2D* texture,Color color,double x,double y,double w,double h,void(*f)()):func(f),pressed(false),hover(false),tinted(texture,color,x,y,w,h){}
+				void boot()override{}
 				void tick()override{
-					tinted::tick();
 					Vector2 mouse=GetMousePosition();
 					float sw=GetScreenWidth();
 					float sh=GetScreenHeight();
@@ -178,10 +203,14 @@ namespace enginend{
 						}
 					}else{
 						hover=false;
+						pressed=false;
 					}
 				}
 				void draw()override {
 					tinted::draw();
+				}
+				void exit()override{
+					tinted::exit();
 				}
 			};
 			struct labeledbutton :virtual public button {
@@ -190,10 +219,14 @@ namespace enginend{
 				int fs;
 				Color txc;
 				labeledbutton(std::string name,Texture2D* texture,Color color,Color text,
-				   double x,double y,double w,double h,void(*f)(),
-				   Font fnt,int size):font(fnt),fs(size),txc(text),label(name),
-				   button(texture,color,x,y,w,h,f)
+					double x,double y,double w,double h,void(*f)(),
+					Font fnt,int size):font(fnt),fs(size),txc(text),label(name),
+					button(texture,color,x,y,w,h,f)
 				{}
+				void boot()override{}
+				void tick()override{
+					button::tick();
+				}
 				void draw()override{
 					button::draw();
 					float sw=GetScreenWidth();
@@ -209,6 +242,9 @@ namespace enginend{
 					 };
 					DrawTextEx(font,label.c_str(),tpos,fs,1,txc);
 				}
+				void exit()override{
+					button::exit();
+				}
 			};
 			struct slider :virtual public tinted{
 				float val;
@@ -216,8 +252,8 @@ namespace enginend{
 				float maxv;
 				slider():val(0),minv(0),maxv(1){}
 				slider(Texture2D* texture,Color color,double x,double y,double w,double h,float min,float max,float v):val(v),minv(min),maxv(max),tinted(texture,color,x,y,w,h){}
+				void boot()override{}
 				void tick()override{
-					tinted::tick();
 					Vector2 mouse=GetMousePosition();
 					float sw=GetScreenWidth();
 					float sh=GetScreenHeight();
@@ -240,11 +276,18 @@ namespace enginend{
 					float t=(val-minv)/(maxv-minv);
 					DrawRectangle(ax,ay,aw*t,ah,c);
 				}
+				void exit()override{
+					tinted::exit();
+				}
 			};
 			struct textfield :public text{
 				textfield(){}
 				textfield(Texture2D* texture,Color txcol,Color color,double x,double y,double w,double h,Font f,float fsize,std::string txt):
-				   text(texture,txcol,color,x,y,w,h,f,fsize,txt){}
+					text(texture,txcol,color,x,y,w,h,f,fsize,txt){}
+				void boot()override{}
+				void tick()override{
+					text::tick();
+				}
 				void draw()override{
 					float sw=GetScreenWidth();
 					float sh=GetScreenHeight();
@@ -260,13 +303,17 @@ namespace enginend{
 					DrawRectangle(ax-(po/2),ay-(po/2),minw+(po*1.1),minh+(po*1.1),c);
 					DrawTextEx(font,content.c_str(),{ax,ay},fs,charsize.x/2,txc);
 				}
+				void exit()override{
+					text::exit();
+				}
 			};
 			struct textinput :public text{
 				bool active;
 				int cpos;
 				textinput():active(false),cpos(0){}
 				textinput(Texture2D* texture,Color txcol,Color color,double x,double y,double w,double h,Font f,float fsize):active(false),cpos(0),
-				   text(texture,txcol,color,x,y,w,h,f,fsize,""){}
+					text(texture,txcol,color,x,y,w,h,f,fsize,""){}
+				void boot()override{}
 				void tick()override{
 					text::tick();
 					Vector2 mouse=GetMousePosition();
@@ -301,13 +348,17 @@ namespace enginend{
 						DrawRectangle(ax+MeasureTextEx(font,content.c_str(),fs,1).x,ay,2,fs,{0,0,0,127});
 					}
 				}
+				void exit()override{
+					text::exit();
+				}
 			};
 			struct textinputfield :public textfield{
 				bool active;
 				int cpos;
 				textinputfield():active(false),cpos(0){}
 				textinputfield(Texture2D* texture,Color txcol,Color color,double x,double y,double w,double h,Font f,float fsize):active(false),cpos(0),
-				   textfield(texture,txcol,color,x,y,w,h,f,fsize,""){}
+					textfield(texture,txcol,color,x,y,w,h,f,fsize,""){}
+				void boot()override{}
 				void tick()override{
 					textfield::tick();
 					Vector2 mouse=GetMousePosition();
@@ -357,6 +408,10 @@ namespace enginend{
 						DrawRectangle(p.x+MeasureTextEx(font,line.c_str(),fs,1).x,p.y,2,fs,BLACK);
 					}
 				}
+				void exit()override{
+					textfield::exit();
+				}
 			};
 		}
-	}}
+	}
+}

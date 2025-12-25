@@ -6,6 +6,7 @@ if(WIN32)
 else()
     set(PLATFORM_DIR "linux")
 endif()
+
 add_subdirectory(engine)
 add_subdirectory(games/forespend)
 add_subdirectory(games/endlauncher)
