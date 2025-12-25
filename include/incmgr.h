@@ -1,3 +1,4 @@
+#pragma once
 #include <tiny/tdf.h>
 #include <tiny/term.h>
 #include <raylib.h>

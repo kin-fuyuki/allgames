@@ -9,3 +9,9 @@ long long calibrate() {
 	return (__rdtsc() - start) * 10;
 }
 const long long enginend::CPUCLOCK=calibrate();
+void enginend::program::changescene(scene *scn) {
+	this->currentscene->exit();
+	delete this->currentscene;
+	this->currentscene = scn;
+	this->currentscene->boot();
+}

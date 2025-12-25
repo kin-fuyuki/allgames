@@ -14,13 +14,13 @@ public:
 		InitWindow(500,500,"test");
 		SetTargetFPS(GetMonitorRefreshRate(GetCurrentMonitor()));
 		this->tickrate=GetMonitorRefreshRate(GetCurrentMonitor());
-		s.nodes=std::list<node*>{
+		s.nodes=std::list<nodes::node*>{
 			
-			new colored(Color{255,255,255,255},0,0,500,500),
-			new textfield(nullptr,Color{255,127,127,255},Color{127,127,127,255}
-				,100,100,220,32,GetFontDefault(),32,
-			"welcome to enginend!\n"
-				  "hehe"
+			new nodes::colored(Color{255,255,255,255},0,0,500,500),
+			new nodes::textfield(nullptr,Color{255,127,127,255},Color{127,127,127,255}
+								,100,100,220,32,GetFontDefault(),32,
+								"welcome to enginend!\n"
+								"hehe"
 			)
 		};
 		s.boot();

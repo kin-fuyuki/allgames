@@ -2,7 +2,7 @@
 
 #include <incmgr.h>
 
-class server : public program{
+class server : public enginend::program{
 public:
 	server();
 	const char* CONF() final{return "client.tdf";}

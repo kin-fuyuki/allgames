@@ -7,7 +7,7 @@
 #include <chrono>
 
 using namespace enginend;
-
+using namespace enginend::nodes;
 netio nete{};
 /*
 
@@ -111,7 +111,6 @@ public:
 	Texture2D buttonslabel[8];
 	Font gamename,changelog,information;
 	bool vsync=true;
-	scene s;
 	RenderTexture2D target;
 	text version;
 	std::string selectedversion="";
@@ -169,7 +168,7 @@ public:
 		playbtn[0]=LoadTexture("res/playoff.png");
 		playbtn[1]=LoadTexture("res/playon.png");
 		playbutton= new button(&playbtn[0], {255,255,255,255},406,(18*11)+17+9,153,59,std::function<void()>(playbuttonfunc));
-		s.nodes=std::list<node*>{
+		currentscene->nodes=std::list<node*>{
 			new background(&bg,0,0,600,300),
 			new textured(&buttonfore,3,36,62,62),
 			new textured(&buttonlock,3,36+((62+4)*1),62,62),
@@ -189,7 +188,7 @@ public:
 			new text(nullptr,Color{255,255,255,255},Color{0,0,0,0},96+16,(16*14)-3,1,1,information,20,"downloaded        verified"),
 			&version,
 		};
-		s.boot();
+		currentscene->boot();
 	}
 	int buttondelay=0;
 	void tick() override {
@@ -234,14 +233,14 @@ public:
 			}
 			}
 		}
-		s.tick();
+		currentscene->tick();
 		buttondelay--;
 	}
 	bool changedmenu=true;
 	bool itemchanged=true;
 	void draw() override {
 		BeginTextureMode(target);
-		s.draw();
+		currentscene->draw();
 		EndTextureMode();
 		BeginDrawing();
 		ClearBackground(BLANK);
@@ -267,7 +266,7 @@ public:
 		}
 	}
 	void exit() override {
-		s.exit();
+		currentscene->exit();
 	}
 };
 

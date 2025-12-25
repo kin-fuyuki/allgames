@@ -3,6 +3,8 @@
 #include <immintrin.h>
 #include <time.h>
 
+#include "scenes/scene.h"
+
 namespace enginend{
 	extern const long long CPUCLOCK;
 inline const char* COMMONCONFIG();
@@ -10,8 +12,10 @@ class program {
 	unsigned long long currenttick = __rdtsc();
 	unsigned long long currentframe = __rdtsc();
 public:
+	scene *currentscene;
 	int tickrate;
 	int framerate;
+	void changescene(scene*scn);
 	program():client(false){}
 	program(bool isclient):client(isclient){}
 	virtual const char* CONF()=0;
