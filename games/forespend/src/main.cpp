@@ -7,14 +7,14 @@
 PLATFORM platform=LINUX;
 std::string androidpackage="kn.kinfuyuki.forespend";
 inline const char* COMMONCONFIG(){return "common.tdf";}
-tiny::ErrorLevel tiny::level{6};
+tiny::ErrorLevel tiny::level{4};
 int main(int argc, char** argv) {
 	enginend::program* game;
 	tiny::startup("forespend","0.03g-rewrite");
 	bool isserver = false;
 	if (argc>1) {
 		for (int i=1;i<argc;i++) {
-			if (argv[i]=="server") {
+			if (argv[i]=="server ") {
 				isserver = true;
 			}
 		}

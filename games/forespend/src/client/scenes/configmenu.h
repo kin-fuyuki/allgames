@@ -1,6 +1,11 @@
 #pragma once
 #include <vector>
-#include <enginend/scenes/node2drelative.h>
+#include <incmgr.h>
 
+extern Font forefont;
+extern enginend::group maincfgpage;
+extern enginend::group graphics;
+extern enginend::group sound;
+extern enginend::group controls;
 
-std::vector<enginend::nodes::group> config{};
+void initconfigmenu();

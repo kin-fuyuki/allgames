@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 set(CMAKE_CXX_FLAGS "-std=c++17 -Wno-error")
-file(GLOB_RECURSE ENGINE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+
+file(GLOB_RECURSE ENGINE_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 add_custom_command(OUTPUT "${CMAKE_BINARY_DIR}/force_rebuild"
         COMMAND rm -f "${CMAKE_SOURCE_DIR}/link/libenginend.so"
         COMMAND rm -rf "${CMAKE_SOURCE_DIR}/include/enginend"
@@ -18,7 +19,7 @@ set_target_properties(enginend PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/link"
 )
 
-file(GLOB_RECURSE HEADER_FILES "${ENGINE_SRC_DIR}/*.h" "${ENGINE_SRC_DIR}/*.hpp")
+file(GLOB_RECURSE HEADER_FILES CONFIGURE_DEPENDS "${ENGINE_SRC_DIR}/*.h" "${ENGINE_SRC_DIR}/*.hpp")
 foreach(HEADER ${HEADER_FILES})
     file(RELATIVE_PATH REL_PATH "${ENGINE_SRC_DIR}" "${HEADER}")
 

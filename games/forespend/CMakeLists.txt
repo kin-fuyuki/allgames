@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 set(CMAKE_CXX_FLAGS "-std=c++17 -Wno-error")
-file(GLOB_RECURSE FORESPEND_SOURCES "src/*.cpp")
+file(GLOB_RECURSE FORESPEND_SOURCES CONFIGURE_DEPENDS "src/*.cpp")
 add_executable(forespend ${FORESPEND_SOURCES})
 
 set_target_properties(forespend PROPERTIES

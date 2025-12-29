@@ -6,9 +6,9 @@
 #include "../net.h"
 #include<tiny/term.h>
 
-	namespace enginend {
-namespace nodes {
-	struct node{
+namespace enginend {
+	namespace nodes {
+		struct node{
 		public:
 			virtual void boot()=0;
 			virtual void tick()=0;
@@ -18,6 +18,7 @@ namespace nodes {
 	}
 	struct group : public virtual enginend::nodes::node {
 		std::vector<node*> children;
+		group(std::vector<node*>& children) : children(std::move(children)) {}
 		void boot(){for (node* n: children){n->boot();}}
 		void tick(){for (node* n: children){n->tick();}}
 		void draw(){for (node* n: children){n->draw();}}

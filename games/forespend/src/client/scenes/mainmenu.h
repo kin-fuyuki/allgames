@@ -1,6 +1,7 @@
 #pragma once
 #include <incmgr.h>
 #include <enginend/scenes/node2drelative.h>
+#include "configmenu.h"
 #include <enginend/scenes/node2d.h>
 
 class mainmenu :public virtual enginend::scene{
@@ -11,6 +12,7 @@ public:
 		
 		this->nodes=std::list<enginend::nodes::node*>{
 			new enginend::nodes::relative::animated(AT("res/images/sky.gif"),0,0,1,1,2),
+			new enginend::nodes::relative::text(nullptr,{255,127,0,255},{0,0,0,0},0.25,0.05,0.8,0.1,forefont,32,"FORESPEND"),
 		};
 		enginend::scene::boot();
 	}

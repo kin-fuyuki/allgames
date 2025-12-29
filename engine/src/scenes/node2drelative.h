@@ -141,9 +141,11 @@ namespace enginend{
 				std::string content;
 				text(){fs=20;}
 				text(Texture2D* texture,Color txcol,Color color,double x,double y,double w,double h,Font f,float fsize,std::string txt):
-					tinted(texture,color,x,y,w,h),
+					//tinted(texture,color,x,y,w,h),
 					font(f),fs(fsize),content(txt),txc(txcol)
 				{
+					this->x=x;this->y=y;this->w=w;this->h=h;
+					this->texture=texture;this->c=color;
 					result=content;
 					size_t initp=0;
 					while((initp=result.find("\n",initp))!=std::string::npos){
@@ -167,8 +169,12 @@ namespace enginend{
 					float sh=GetScreenHeight();
 					float ax=x*sw;
 					float ay=y*sh;
+					
 					float aw=w*sw;
 					float ah=h*sh;
+					tiny::echo("og: %f %f %f %f", x,y,w,h);
+					tiny::echo("drawing text: %s", content.c_str());
+					tiny::echo("transformed: %f %f %f %f", ax, ay, aw, ah);
 					Vector2 minsize=MeasureTextEx(font,content.c_str(),fs,1);
 					Vector2 charsize=MeasureTextEx(font," ",fs,1);
 					float p=charsize.x>charsize.y?charsize.x/minsize.x:charsize.y/minsize.y;
