@@ -17,7 +17,7 @@ namespace enginend {
 		}
 		virtual void draw() {
 			
-			ClearBackground(BLANK);
+			ClearBackground(rl::BLANK);
 			BeginDrawing();
 			for (enginend::nodes::node* n : nodes) {
 				n->draw();
