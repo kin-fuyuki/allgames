@@ -124,7 +124,7 @@ public:
 		SetConfigFlags(FLAG_WINDOW_UNDECORATED|FLAG_WINDOW_TRANSPARENT|FLAG_WINDOW_TOPMOST);
 		tiny::error("is transparent lol");
 		InitWindow(600,300,"test");target=LoadRenderTexture(600, 300);
-		img=GenImageColor(600, 300, BLANK);
+		img=GenImageColor(600, 300, rl::BLANK);
 		SetTargetFPS(GetMonitorRefreshRate(GetCurrentMonitor()));
 		this->tickrate=GetMonitorRefreshRate(GetCurrentMonitor());
 		bg=LoadTexture("res/launcher.png");
@@ -243,8 +243,8 @@ public:
 		currentscene->draw();
 		EndTextureMode();
 		BeginDrawing();
-		ClearBackground(BLANK);
-		DrawTexturePro(target.texture, {0, 0, 600, -300}, {0, 0, 600, 300}, {0, 0}, 0, WHITE);
+		ClearBackground(rl::BLANK);
+		DrawTexturePro(target.texture, {0, 0, 600, -300}, {0, 0, 600, 300}, {0, 0}, 0, rl::WHITE);
 		EndDrawing();
 		Vector2 mp=Vector2(GetMousePositionDesktop());
 		Vector2 wp=GetWindowPosition();

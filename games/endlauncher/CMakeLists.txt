@@ -12,11 +12,11 @@ target_link_directories(
         "${CMAKE_SOURCE_DIR}/link")
 target_link_libraries(endlauncher PRIVATE
         "${CMAKE_SOURCE_DIR}/link/libenginend.so"
-        "${CMAKE_SOURCE_DIR}/link/libdesktopraylib.so"
+        "${CMAKE_SOURCE_DIR}/link/liblinux64raylib.so"
         curl zip
 )
 target_include_directories(endlauncher PUBLIC
         ${CMAKE_SOURCE_DIR}/include
-        ${CMAKE_SOURCE_DIR}/lib/raylib/build/raylib/include
+        ${CMAKE_SOURCE_DIR}/lib/raylib/linux-64/raylib/include
         ${CMAKE_SOURCE_DIR}/engine/include
 )

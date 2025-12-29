@@ -5,7 +5,8 @@ add_custom_command(OUTPUT "${CMAKE_BINARY_DIR}/force_rebuild"
         COMMAND rm -f "${CMAKE_SOURCE_DIR}/link/libenginend.so"
         COMMAND rm -rf "${CMAKE_SOURCE_DIR}/include/enginend"
 )
-add_library(enginend SHARED ${ENGINE_SOURCES} "${CMAKE_BINARY_DIR}/force_rebuild")
+add_library(enginend SHARED ${ENGINE_SOURCES} "${CMAKE_BINARY_DIR}/force_rebuild"
+        ../include/json.h)
 target_link_directories(
         enginend PUBLIC
         "${CMAKE_SOURCE_DIR}/link")
@@ -48,9 +49,10 @@ target_link_libraries(test PRIVATE
 )
 target_include_directories(test PUBLIC
         ${CMAKE_SOURCE_DIR}/include
-        ${CMAKE_SOURCE_DIR}/lib/raylib/build/raylib/include
+        ${CMAKE_SOURCE_DIR}/lib/raylib/linux-64/raylib/include
 )
 target_include_directories(enginend PUBLIC
-        ${CMAKE_SOURCE_DIR}/lib/raylib/build/raylib/include
+        ${CMAKE_SOURCE_DIR}/include
+        ${CMAKE_SOURCE_DIR}/lib/raylib/linux-64/raylib/include
 
 )
